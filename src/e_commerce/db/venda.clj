@@ -1,16 +1,16 @@
 (ns e-commerce.db.venda
   (:require [datomic.api :as d]
-            [e-commerce.adapter.entidade :as adapter.entidade]
             [e-commerce.model :as model]
             [schema.core :as s]))
 
 (s/defn adiciona! :- s/Uuid
   [conn
-   {:venda/keys [id produto quantidade]} :- model/Venda]
+   {:venda/keys [id produto quantidade situacao]} :- model/Venda]
   (do (d/transact conn [{:db/id (str "venda-" id)
                          :venda/id         id
                          :venda/produto    [:produto/id (:produto/id produto)]
-                         :venda/quantidade quantidade}])
+                         :venda/quantidade quantidade
+                         :venda/situacao   situacao}])
       id))
 
 ; Tem um problema se o preço do produto mudar.
@@ -50,24 +50,56 @@
                   [(* ?quantidade ?preco) ?custo-por-produto]]
          (d/as-of db instante) venda-id)))
 
-(s/defn cancela!
-  [conn venda-id :- s/Uuid]
-  (d/transact conn [[:db/retractEntity [:venda/id venda-id]]]))
-
 (s/defn todas-nao-canceladas!                                              ;:- [model/Venda]
   [db]
   (-> (d/q '[:find ?id
-             :where [?venda :venda/id ?id]]
+             :where [?venda :venda/id ?id]
+                    [?venda :venda/situacao ?situacao]
+                    [(not= ?situacao "cancelada")]]
            db)))
 
 (defn todas!
   [db]
   (-> (d/q '[:find ?id
-             :where [?venda :venda/id ?id _ true]]
-           (d/history db))))
+             :where [?venda :venda/id ?id]]
+           db)))
 
 (defn todas-canceladas!
   [db]
   (-> (d/q '[:find ?id
-             :where [?venda :venda/id ?id _ false]]
-           (d/history db))))
+             :where [?venda :venda/id ?id]
+                    [?venda :venda/situacao "cancelada"]]
+           db)))
+
+(s/defn altera-situacao!
+  [conn
+   venda-id :- s/Uuid
+   situacao :- s/Str]
+  (d/transact conn [{:venda/id venda-id
+                     :venda/situacao situacao}]))
+
+(s/defn cancela!
+  [conn venda-id :- s/Uuid]
+  (altera-situacao! conn venda-id "cancelada"))
+
+(s/defn historico
+  [db venda-id :- s/Uuid]
+  (->> (d/q '[:find ?instante ?situacao
+              :in $ ?id
+              :where [?venda :venda/id ?id]
+                     [?venda :venda/situacao ?situacao ?tx true]
+                     [?tx :db/txInstant ?instante]]
+            (d/history db) venda-id)
+       (sort-by first)))
+
+(defn historico-geral
+  [db
+   instant-desde]
+  (let [filtrado (d/since db instant-desde)]
+    (->> (d/q '[:find ?instante ?situacao ?id
+                :in $ $filtrado
+                :where [$ ?venda :venda/id ?id]
+                       [$filtrado ?venda :venda/situacao ?situacao ?tx]
+                       [$filtrado ?tx :db/txInstant ?instante]]
+              db filtrado)
+         (sort-by first))))

@@ -27,7 +27,8 @@
 (def Venda
   {:venda/id                          s/Uuid
    (s/optional-key :venda/produto)    Produto
-   (s/optional-key :venda/quantidade) s/Int})
+   (s/optional-key :venda/quantidade) s/Int
+   (s/optional-key :venda/situacao)   s/Str})
 
 (s/defn novo-produto :- Produto
   ([nome slug preco]
@@ -58,4 +59,5 @@
     quantidade :- s/Int]
    {:venda/id   uuid
     :venda/produto produto
-    :venda/quantidade quantidade}))
+    :venda/quantidade quantidade
+    :venda/situacao "nova"}))
