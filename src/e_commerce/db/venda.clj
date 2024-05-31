@@ -1,5 +1,6 @@
 (ns e-commerce.db.venda
   (:require [datomic.api :as d]
+            [e-commerce.adapter.entidade :as adapter.entidade]
             [e-commerce.model :as model]
             [schema.core :as s]))
 
@@ -48,3 +49,25 @@
                   [?produto :produto/preco ?preco]
                   [(* ?quantidade ?preco) ?custo-por-produto]]
          (d/as-of db instante) venda-id)))
+
+(s/defn cancela!
+  [conn venda-id :- s/Uuid]
+  (d/transact conn [[:db/retractEntity [:venda/id venda-id]]]))
+
+(s/defn todas-nao-canceladas!                                              ;:- [model/Venda]
+  [db]
+  (-> (d/q '[:find ?id
+             :where [?venda :venda/id ?id]]
+           db)))
+
+(defn todas!
+  [db]
+  (-> (d/q '[:find ?id
+             :where [?venda :venda/id ?id _ true]]
+           (d/history db))))
+
+(defn todas-canceladas!
+  [db]
+  (-> (d/q '[:find ?id
+             :where [?venda :venda/id ?id _ false]]
+           (d/history db))))

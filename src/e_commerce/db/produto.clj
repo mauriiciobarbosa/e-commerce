@@ -103,6 +103,16 @@
   [conn produto-id :- s/Uuid]
   (d/transact conn [[:incrementa-visualizacao produto-id]]))
 
+(s/defn historico-de-precos
+  [db produto-id :- s/Uuid]
+  (->> (d/q '[:find ?instante ?preco
+              :in $ ?id
+              :where [?produto :produto/id ?id]
+              [?produto :produto/preco ?preco ?tx true]
+              [?tx :db/txInstant ?instante]]
+            (d/history db) produto-id)
+       (sort-by first)))
+
 
 
 
