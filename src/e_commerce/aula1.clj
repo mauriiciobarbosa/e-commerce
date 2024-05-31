@@ -11,6 +11,6 @@
 (db.config/cria-schema! conn)
 
 ;FIXME mover pra outro namespace
-(db.config/cria-dados-de-exemplo conn)
+(db.config/cria-dados-de-exemplo! conn)
 
 (db.produto/todos (d/db conn))

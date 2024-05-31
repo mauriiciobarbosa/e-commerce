@@ -77,12 +77,24 @@
              ; Transações
              {:db/ident       :tx-data/ip
               :db/valueType   :db.type/string
+              :db/cardinality :db.cardinality/one}
+
+             ;Venda
+             {:db/ident       :venda/id
+              :db/valueType   :db.type/uuid
+              :db/cardinality :db.cardinality/one
+              :db/unique      :db.unique/identity}
+             {:db/ident       :venda/produto
+              :db/valueType   :db.type/ref
+              :db/cardinality :db.cardinality/one}
+             {:db/ident       :venda/quantidade
+              :db/valueType   :db.type/long
               :db/cardinality :db.cardinality/one}])
 
 (defn cria-schema! [conn]
   (d/transact conn schema))
 
-(defn cria-dados-de-exemplo [conn]
+(defn cria-dados-de-exemplo! [conn]
   (def eletronicos (model/nova-categoria "Eletrônicos"))
   (def esporte (model/nova-categoria "Esporte"))
   (pprint @(db.categoria/adiciona! conn [eletronicos, esporte]))

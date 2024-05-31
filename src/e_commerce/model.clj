@@ -24,6 +24,11 @@
    (s/optional-key :produto/variacao)      [Variacao]
    (s/optional-key :produto/visualizacoes) s/Int})
 
+(def Venda
+  {:venda/id                          s/Uuid
+   (s/optional-key :venda/produto)    Produto
+   (s/optional-key :venda/quantidade) s/Int})
+
 (s/defn novo-produto :- Produto
   ([nome slug preco]
    (novo-produto (uuid) nome slug preco))
@@ -43,3 +48,14 @@
   ([uuid nome]
    {:categoria/id   uuid
     :categoria/nome nome}))
+
+(s/defn nova-venda :- Venda
+  ([produto :- Produto
+    quantidade :- s/Int]
+   (nova-venda (uuid) produto quantidade))
+  ([uuid :- s/Uuid
+    produto :- Produto
+    quantidade :- s/Int]
+   {:venda/id   uuid
+    :venda/produto produto
+    :venda/quantidade quantidade}))
