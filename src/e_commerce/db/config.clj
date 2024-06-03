@@ -1,6 +1,7 @@
 (ns e-commerce.db.config
   (:use clojure.pprint)
   (:require [datomic.api :as d]
+            [e-commerce.db.venda :as db.venda]
             [e-commerce.model :as model]
             [e-commerce.db.produto :as db.produto]
             [e-commerce.db.categoria :as db.categoria]))
@@ -27,6 +28,7 @@
              {:db/ident       :produto/preco
               :db/valueType   :db.type/bigdec
               :db/cardinality :db.cardinality/one
+              :db/index       true
               :db/doc         "O preço de um produto com precisão monetária"}
              {:db/ident       :produto/palavra-chave
               :db/valueType   :db.type/string
@@ -110,7 +112,11 @@
   (pprint @(db.produto/adiciona-ou-altera! conn [computador, celular, celular-barato, xadrez, jogo] "200.216.222.125"))
 
   (db.categoria/atribui! conn [computador, celular, celular-barato, jogo] eletronicos)
-  (db.categoria/atribui! conn [xadrez] esporte))
+  (db.categoria/atribui! conn [xadrez] esporte)
+
+  (db.venda/adiciona! conn (model/nova-venda computador 3))
+  (db.venda/adiciona! conn (model/nova-venda computador 4))
+  (db.venda/adiciona! conn (model/nova-venda computador 8)))
 
 
 

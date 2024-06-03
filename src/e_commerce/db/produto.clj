@@ -113,6 +113,44 @@
             (d/history db) produto-id)
        (sort-by first)))
 
+(s/defn busca-mais-caro
+  [db]
+  (d/q '[:find (max ?preco) .
+         :where [_ :produto/preco ?preco]]
+       db))
+
+(defn busca-mais-caro-que
+  [db preco-minimo]
+  (d/q '[:find ?preco
+         :in $ ?minimo
+         :where [_ :produto/preco ?preco]
+                [(>= ?preco ?minimo)]]
+       db preco-minimo))
+
+(defn busca-por-preco
+  [db preco]
+  (d/q '[:find (pull ?produto [*])
+         :in $ ?preco
+         :where [?produto :produto/preco ?preco]]
+       db preco))
+
+(defn busca-por-preco-e-nome
+  [db preco nome]
+  (d/q '[:find (pull ?produto [*])
+         :in $ ?preco ?trecho
+         :where [?produto :produto/nome ?nome]
+                [(.contains ?nome ?trecho)]
+                [?produto :produto/preco ?preco]]
+       db preco nome))
+
+(defn busca-por-preco-e-nome-otimizado
+  [db preco nome]
+  (d/q '[:find (pull ?produto [*])
+         :in $ ?preco ?trecho
+         :where [?produto :produto/preco ?preco]
+                [?produto :produto/nome ?nome]
+                [(.contains ?nome ?trecho)]]
+       db preco nome))
 
 
 

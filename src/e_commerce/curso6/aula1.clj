@@ -1,10 +1,11 @@
-(ns e-commerce.aula2
+(ns e-commerce.curso6.aula1
   (:require [datomic.api :as d]
             [e-commerce.db.produto :as db.produto]
             [e-commerce.db.config :as db.config]
-            [e-commerce.db.venda :as db.venda]
             [e-commerce.model :as model]
-            [schema.core :as s]))
+            [e-commerce.generators :as generators]
+            [schema.core :as s]
+            [schema-generators.generators :as g]))
 
 (s/set-fn-validation! true)
 (db.config/apaga-banco!)
@@ -17,8 +18,5 @@
 
 (def primeiro (first (db.produto/todos (d/db conn))))
 
-(def venda-1 (db.venda/adiciona! conn (model/nova-venda primeiro 3)))
-
-(db.venda/custo-total-errado (d/db conn) venda-1)
-
-(db.produto/atualiza-preco! conn (:produto/id primeiro) (:produto/preco primeiro) (+ (:produto/preco primeiro) 20M))
+(g/sample 100 model/Categoria)
+(g/sample 100 model/Variacao generators/leaf-generators)

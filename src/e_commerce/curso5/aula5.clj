@@ -1,4 +1,4 @@
-(ns e-commerce.aula5
+(ns e-commerce.curso5.aula5
   (:require [datomic.api :as d]
             [e-commerce.db.produto :as db.produto]
             [e-commerce.db.config :as db.config]

@@ -1,4 +1,4 @@
-(ns e-commerce.aula3
+(ns e-commerce.curso5.aula2
   (:require [datomic.api :as d]
             [e-commerce.db.produto :as db.produto]
             [e-commerce.db.config :as db.config]
@@ -22,6 +22,3 @@
 (db.venda/custo-total-errado (d/db conn) venda-1)
 
 (db.produto/atualiza-preco! conn (:produto/id primeiro) (:produto/preco primeiro) (+ (:produto/preco primeiro) 20M))
-
-(db.venda/custo-total-errado (d/db conn) venda-1)
-(db.venda/custo-total (d/db conn) venda-1)

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--  see http://logback.qos.ch/manual/configuration.html -->
+<configuration>
+    <logger name="datomic.db" level="WARN"/>
+    <logger name="datomic.peer" level="WARN"/>
+<!--    <statusListener class="ch.qos.logback.core.status.NopStatusListener" />-->
+</configuration>

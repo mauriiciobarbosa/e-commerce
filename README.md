@@ -2,6 +2,9 @@
 
 A Clojure library designed to ... well, that part is up to you.
 
+Curso 5 - Banco filtrado e histórico
+Curso 6 - Geradores, schemas e índices
+
 ## Usage
 
 FIXME

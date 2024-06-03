@@ -10,7 +10,7 @@
 (def Variacao
   {:variacao/id   s/Uuid
    :variacao/nome s/Str
-   :variacao/preco s/Num})
+   :variacao/preco BigDecimal})
 
 (def Produto
   {:produto/id                             s/Uuid
@@ -19,10 +19,10 @@
    (s/optional-key :produto/preco)         BigDecimal
    (s/optional-key :produto/palavra-chave) [s/Str]
    (s/optional-key :produto/categoria)     Categoria
-   (s/optional-key :produto/estoque)       s/Int
+   (s/optional-key :produto/estoque)       Long
    (s/optional-key :produto/digital)       s/Bool
    (s/optional-key :produto/variacao)      [Variacao]
-   (s/optional-key :produto/visualizacoes) s/Int})
+   (s/optional-key :produto/visualizacoes) Long})
 
 (def Venda
   {:venda/id                          s/Uuid
