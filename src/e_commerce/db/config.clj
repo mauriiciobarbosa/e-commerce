@@ -1,10 +1,15 @@
 (ns e-commerce.db.config
   (:use clojure.pprint)
   (:require [datomic.api :as d]
+            [e-commerce.db.adapter :as db.adapter]
             [e-commerce.db.venda :as db.venda]
             [e-commerce.model :as model]
             [e-commerce.db.produto :as db.produto]
-            [e-commerce.db.categoria :as db.categoria]))
+            [e-commerce.db.categoria :as db.categoria]
+            [e-commerce.wire.db.categoria :as wire.db.categoria]
+            [e-commerce.wire.db.produto :as wire.db.produto]
+            [e-commerce.wire.db.variacao :as wire.db.variacao]
+            [e-commerce.wire.db.venda :as wire.db.venda]))
 
 (def db-uri "datomic:dev://localhost:4334/ecommerce")
 
@@ -15,89 +20,15 @@
 (defn apaga-banco! []
   (d/delete-database db-uri))
 
-(def schema [
-             ; Produtos
-             {:db/ident       :produto/nome
-              :db/valueType   :db.type/string
-              :db/cardinality :db.cardinality/one
-              :db/doc         "O nome de um produto"}
-             {:db/ident       :produto/slug
-              :db/valueType   :db.type/string
-              :db/cardinality :db.cardinality/one
-              :db/doc         "O caminho para acessar esse produto via http"}
-             {:db/ident       :produto/preco
-              :db/valueType   :db.type/bigdec
-              :db/cardinality :db.cardinality/one
-              :db/index       true
-              :db/doc         "O preço de um produto com precisão monetária"}
-             {:db/ident       :produto/palavra-chave
-              :db/valueType   :db.type/string
-              :db/cardinality :db.cardinality/many}
-             {:db/ident       :produto/id
-              :db/valueType   :db.type/uuid
-              :db/cardinality :db.cardinality/one
-              :db/unique      :db.unique/identity}
-             {:db/ident       :produto/categoria
-              :db/valueType   :db.type/ref
-              :db/cardinality :db.cardinality/one}
-             {:db/ident       :produto/estoque
-              :db/valueType   :db.type/long
-              :db/cardinality :db.cardinality/one}
-             {:db/ident       :produto/digital
-              :db/valueType   :db.type/boolean
-              :db/cardinality :db.cardinality/one}
-             {:db/ident       :produto/variacao
-              :db/valueType   :db.type/ref
-              :db/isComponent true
-              :db/cardinality :db.cardinality/many}
-             {:db/ident       :produto/visualizacoes
-              :db/valueType   :db.type/long
-              :db/cardinality :db.cardinality/one
-              :db/noHistory   true}
-
-             ; Variacao
-             {:db/ident       :variacao/id
-              :db/valueType   :db.type/uuid
-              :db/cardinality :db.cardinality/one
-              :db/unique      :db.unique/identity}
-             {:db/ident       :variacao/nome
-              :db/valueType   :db.type/string
-              :db/cardinality :db.cardinality/one}
-             {:db/ident       :variacao/preco
-              :db/valueType   :db.type/bigdec
-              :db/cardinality :db.cardinality/one}
-
-             ; Categorias
-             {:db/ident       :categoria/nome
-              :db/valueType   :db.type/string
-              :db/cardinality :db.cardinality/one}
-             {:db/ident       :categoria/id
-              :db/valueType   :db.type/uuid
-              :db/cardinality :db.cardinality/one
-              :db/unique      :db.unique/identity}
-
-             ; Transações
-             {:db/ident       :tx-data/ip
-              :db/valueType   :db.type/string
-              :db/cardinality :db.cardinality/one}
-
-             ;Venda
-             {:db/ident       :venda/id
-              :db/valueType   :db.type/uuid
-              :db/cardinality :db.cardinality/one
-              :db/unique      :db.unique/identity}
-             {:db/ident       :venda/produto
-              :db/valueType   :db.type/ref
-              :db/cardinality :db.cardinality/one}
-             {:db/ident       :venda/quantidade
-              :db/valueType   :db.type/long
-              :db/cardinality :db.cardinality/one}
-             {:db/ident       :venda/situacao
-              :db/valueType   :db.type/string
-              :db/cardinality :db.cardinality/one}])
-
 (defn cria-schema! [conn]
-  (d/transact conn schema))
+  (let [schemas (concat (db.adapter/schema-to-datomic wire.db.categoria/Categoria)
+                        (db.adapter/schema-to-datomic wire.db.variacao/Variacao)
+                        (db.adapter/schema-to-datomic wire.db.venda/Venda)
+                        (db.adapter/schema-to-datomic wire.db.produto/Produto)
+                        [{:db/ident       :tx-data/ip
+                          :db/valueType   :db.type/string
+                          :db/cardinality :db.cardinality/one}])]
+    (d/transact conn schemas)))
 
 (defn cria-dados-de-exemplo! [conn]
   (def eletronicos (model/nova-categoria "Eletrônicos"))

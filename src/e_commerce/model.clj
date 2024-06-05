@@ -8,8 +8,8 @@
    :categoria/nome s/Str})
 
 (def Variacao
-  {:variacao/id   s/Uuid
-   :variacao/nome s/Str
+  {:variacao/id    s/Uuid
+   :variacao/nome  s/Str
    :variacao/preco BigDecimal})
 
 (def Produto
